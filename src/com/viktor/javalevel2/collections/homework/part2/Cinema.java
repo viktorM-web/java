@@ -1,7 +1,14 @@
 package com.viktor.javalevel2.collections.homework.part2;
 
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class Cinema {
     private final Map<Integer, Set<Film>> films = new TreeMap<>();
@@ -9,41 +16,29 @@ public class Cinema {
     public Cinema() {
     }
 
+    public Cinema(Film... movies) {
+        for (Film movie : movies) {
+            addFilm(movie);
+        }
+    }
+
     public void addFilm(Film film) {
-        int yearOfPublishing = film.getYearOfPublishing();
-        if (films.containsKey(yearOfPublishing)) {
-            Set<Film> setFilms = films.get(yearOfPublishing);
-            setFilms.add(film);
-        } else {
-            Set<Film> setFilms = new LinkedHashSet<>();
-            setFilms.add(film);
-            films.put(yearOfPublishing, setFilms);
-        }
+        int yearOfPublishing = film.yearOfPublishing();
+        Set<Film> setFilms = films.getOrDefault(yearOfPublishing, new LinkedHashSet<>());
+        setFilms.add(film);
+        films.put(yearOfPublishing, setFilms);
     }
 
-    public List<Film> getFilmsByYearOfPublishing(int yearOfPublishing) {
-        if (films.containsKey(yearOfPublishing)) {
-            return new ArrayList<>(films.get(yearOfPublishing));
-        } else {
-            System.out.println("no movies with this year of release");
-            return null;
-        }
+    public Set<Film> getFilmsByYearOfPublishing(int yearOfPublishing) {
+        return films.getOrDefault(yearOfPublishing, new LinkedHashSet<>());
     }
 
-    public List<Film> getFilmsByYearAndMonthOfPublishing(int YearOfPublishing, Month MonthOfPublishing) {
-        List<Film> films = getFilmsByYearOfPublishing(YearOfPublishing);
-        if (films == null) {
-            return null;
-        } else {
-            for (Film film : films) {
-                if (!film.getMonthOfPublishing().equals(MonthOfPublishing)) {
-                    films.remove(film);
-                }
+    public Set<Film> getFilmsByYearAndMonthOfPublishing(int year, Month month) {
+        Set<Film> films = new LinkedHashSet<>();
+        for (Film film : getFilmsByYearOfPublishing(year)) {
+            if (film.monthOfPublishing().equals(month)) {
+                films.add(film);
             }
-        }
-        if (films.isEmpty()) {
-            System.out.println("no movies with this month of release");
-            return null;
         }
         return films;
     }
@@ -52,30 +47,22 @@ public class Cinema {
         List<Film> result = new ArrayList<>();
         for (Set<Film> setFilms : films.values()) {
             for (Film film : setFilms) {
-                if (film.getGenre().equals(genre)) {
+                if (film.genre().equals(genre)) {
                     result.add(film);
                 }
             }
-        }
-        if (result.isEmpty()) {
-            System.out.println("no movies with this genre");
-            return null;
         }
         return result;
     }
 
     public List<Film> getTopTenFilms() {
         List<Film> resultFilms = new ArrayList<>();
-        Set<Film> setFilms = new TreeSet<>(Collections.reverseOrder(Comparator.comparingDouble(Film::getRating)));
         for (Set<Film> films : films.values()) {
-            setFilms.addAll(films);
+            resultFilms.addAll(films);
         }
-        for (Film film : setFilms) {
-            resultFilms.add(film);
-            if (resultFilms.size() == 10) {
-                break;
-            }
-        }
+        resultFilms.sort(Collections.reverseOrder(Comparator.comparingDouble(Film::rating)));
+        int lastIndex = resultFilms.size() < 10 ? resultFilms.size() - 1 : 10;
+        resultFilms.subList(0, lastIndex);
         return resultFilms;
     }
 
@@ -85,4 +72,7 @@ public class Cinema {
                 "films=" + films +
                 '}';
     }
+}
+
+record Film(int id, int yearOfPublishing, Month monthOfPublishing, FilmGenre genre, double rating) {
 }

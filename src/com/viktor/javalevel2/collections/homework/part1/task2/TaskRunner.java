@@ -16,7 +16,7 @@ import java.util.List;
  * - С помощью итератора посчитать средний возраст всех оставшихся пользователей.
  */
 public class TaskRunner {
-    private static final int CHECKING_AGE = 18;
+    private static final int MINIMUM_USER_AGE = 18;
 
     public static void main(String[] args) {
         List<User> usersFromBMWChat = Arrays.asList(new User(1001, 18, "Ivan"),
@@ -44,23 +44,29 @@ public class TaskRunner {
     }
 
     private static double getAverageAgeUsers(List<User> usersOlderEighteenth) {
-        double commonAge = 0.0;
-        for (User user : usersOlderEighteenth) {
-            commonAge += user.getAge();
+        double sumAge = 0.0;
+        for (Iterator<User> user = usersOlderEighteenth.iterator(); user.hasNext(); ) {
+            sumAge += user.next().age();
         }
-        return commonAge / usersOlderEighteenth.size();
+        return sumAge / usersOlderEighteenth.size();
     }
 
     private static List<User> getUsersOlderEighteenth(List<Chat> chats) {
         List<User> usersOlderEighteenth = new ArrayList<>();
         for (Chat chat : chats) {
-            List<User> users = chat.getUsers();
+            List<User> users = chat.users();
             for (User user : users) {
-                if (user.getAge() > CHECKING_AGE && !usersOlderEighteenth.contains(user)) {
+                if (user.age() > MINIMUM_USER_AGE && !usersOlderEighteenth.contains(user)) {
                     usersOlderEighteenth.add(user);
                 }
             }
         }
         return usersOlderEighteenth;
     }
+}
+
+record User(int id, int age, String name) {
+}
+
+record Chat(String name, List<User> users) {
 }
