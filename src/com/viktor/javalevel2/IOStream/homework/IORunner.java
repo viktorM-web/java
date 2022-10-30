@@ -23,24 +23,22 @@ import static java.nio.file.StandardOpenOption.CREATE;
  */
 public class IORunner {
     public static void main(String[] args) {
-        Path itemsName = Path.of("/Users", "vikto", "OneDrive", "Рабочий стол", "java2",
-                "java", "resources", "items-name.csv");
-        Path itemsPrice = Path.of("/Users", "vikto", "OneDrive", "Рабочий стол", "java2",
-                "java", "resources", "items-price.csv");
-        Path result = Path.of("/Users", "vikto", "OneDrive", "Рабочий стол", "java2",
-                "java", "resources", "result.csv");
-        Path error = Path.of("/Users", "vikto", "OneDrive", "Рабочий стол", "java2",
-                "java", "resources", "errors.csv");
+        Path itemsName = Path.of("resources", "items-name.csv");
+        Path itemsPrice = Path.of("resources", "items-price.csv");
+        Path result = Path.of("resources", "result.csv");
+        Path error = Path.of("resources", "errors.csv");
         try (Stream<String> streamItemsName = Files.lines(itemsName);
              Stream<String> streamItemsPrice = Files.lines(itemsPrice)
         ) {
             Map<Integer, String> mapItemsName = streamItemsName.skip(1L)
                     .map(string -> string.split(","))
                     .collect(Collectors.toMap((strings -> Integer.parseInt(strings[0])), (strings -> strings[1])));
+
             Map<Integer, Double> mapItemsPrice = streamItemsPrice.skip(1L)
                     .map(string -> string.split(","))
                     .collect(Collectors.toMap((strings -> Integer.parseInt(strings[0])),
                             (strings -> Double.parseDouble(strings[1]))));
+
             writeToFile(mapItemsName, mapItemsPrice, result, error);
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,7 +76,7 @@ public class IORunner {
                 bufferedWriterForError.newLine();
                 bufferedWriterForError.write(String.valueOf(id));
             }
-        }catch(IOException exception){
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
@@ -94,7 +92,7 @@ public class IORunner {
                     bufferedWriterForResult.write(stringResult);
                 }
             }
-        }catch(IOException exception){
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
