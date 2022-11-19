@@ -26,18 +26,18 @@ public class Consumer implements Runnable {
     @Override
     public void run() {
         while (true) {
-            if (!blockingDeque.isEmpty()) {
-                LogFileRow logFileRow = blockingDeque.remove();
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(PATH, CREATE, APPEND)) {
+
+                LogFileRow logFileRow = blockingDeque.take();
                 ReportFileRow reportFileRow = new ReportFileRow(logFileRow.getNumber(),
                         DataTimeUtil.LocalDateTimeForReport(), logFileRow.getTelephone());
-                try (BufferedWriter bufferedWriter = Files.newBufferedWriter(PATH, CREATE, APPEND)) {
-                    Thread.sleep(TIME_CALL);
-                    bufferedWriter.write(reportFileRow.toString());
-                    bufferedWriter.newLine();
-                    System.out.println("обработка жалобы");
-                } catch (InterruptedException | IOException e) {
-                    throw new RuntimeException(e);
-                }
+
+                Thread.sleep(TIME_CALL);
+                bufferedWriter.write(reportFileRow.toString());
+                bufferedWriter.newLine();
+                System.out.println("обработка жалобы");
+            } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
